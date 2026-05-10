@@ -1,0 +1,9 @@
+{
+  "name": "firebase-agent-tools",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

@@ -396,3 +396,7 @@ Use this space to list resources you find helpful and would like to give credit 
 [issues-url]: https://github.com/capcom6/android-sms-gateway/issues
 [license-shield]: https://img.shields.io/github/license/capcom6/android-sms-gateway.svg?style=for-the-badge
 [license-url]: https://github.com/capcom6/android-sms-gateway/blob/master/LICENSE
+
+
+## Experimental Firebase Agent mode
+This fork includes an experimental Firebase queue worker mode (Firestore + Firebase Auth) as an alternative to the private SMSGate backend. See `firebase-agent/README.md`.

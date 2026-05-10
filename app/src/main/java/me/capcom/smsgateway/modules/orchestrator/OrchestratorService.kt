@@ -18,6 +18,7 @@ class OrchestratorService(
     private val webHooksSvc: WebHooksService,
     private val receiverService: ReceiverService,
     private val pingSvc: PingService,
+    private val firebaseAgentSvc: me.capcom.smsgateway.modules.firebaseagent.FirebaseSmsAgentService,
     private val logsSvc: LogsService,
     private val settings: SettingsHelper,
 ) {
@@ -30,6 +31,7 @@ class OrchestratorService(
         messagesSvc.start(context)
         webHooksSvc.start(context)
         gatewaySvc.start(context)
+        firebaseAgentSvc.start()
 
         try {
             localServerSvc.start(context)

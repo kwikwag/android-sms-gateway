@@ -1,0 +1,4 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SwitchPreferenceCompat app:key="firebaseagent.ENABLED" app:title="Enable Firebase Agent" app:defaultValue="false" />
+    <EditTextPreference app:key="firebaseagent.DEVICE_ID" app:title="Device ID" app:useSimpleSummaryProvider="true" />
+</PreferenceScreen>

@@ -12,6 +12,12 @@
         app:title="@string/cloud_server_dotdotdot" />
 
     <Preference
+        android:icon="@drawable/ic_sms"
+        app:fragment="me.capcom.smsgateway.ui.settings.FirebaseAgentSettingsFragment"
+        app:summary="Firestore realtime SMS queue worker"
+        app:title="Firebase Agent..." />
+
+    <Preference
         android:icon="@drawable/ic_messages"
         app:fragment="me.capcom.smsgateway.ui.settings.MessagesSettingsFragment"
         app:title="@string/messages"
