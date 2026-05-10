@@ -8,7 +8,29 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SERVICE_ACCOUNT_FILE = path.join(__dirname, 'service-account.json');
 
-// Auto-detect service-account.json next to this script if no credentials are set
+// Parse args: --to/-t, --message/-m, --sim-slot/-s, --help/-h
+const args = process.argv.slice(2);
+const parsed = {};
+for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === '--help' || a === '-h') {
+        console.log('Usage: enqueue-test-message.js [options]');
+        console.log('');
+        console.log('Options:');
+        console.log('  -t, --to <number>       Recipient phone number (required)');
+        console.log('  -m, --message <text>    Message body (required)');
+        console.log('  -s, --sim-slot <index>  SIM slot, 0-based (optional)');
+        console.log('  -h, --help              Show this help');
+        process.exit(0);
+    } else if ((a === '--to' || a === '-t') && args[i + 1]) {
+        parsed.to = args[++i];
+    } else if ((a === '--message' || a === '-m') && args[i + 1]) {
+        parsed.message = args[++i];
+    } else if ((a === '--sim-slot' || a === '-s') && args[i + 1]) {
+        parsed.simSlot = args[++i];
+    }
+}
+
 if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && fs.existsSync(SERVICE_ACCOUNT_FILE)) {
     process.env.GOOGLE_APPLICATION_CREDENTIALS = SERVICE_ACCOUNT_FILE;
 }
@@ -16,12 +38,17 @@ if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && fs.existsSync(SERVICE_ACCOUNT
 if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-const ask = (q) => new Promise(r => rl.question(q, r));
+let rl;
+const ask = (q) => {
+    if (!rl) rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    return new Promise(r => rl.question(q, r));
+};
 
-const to      = (await ask('Phone number: ')).trim();
-const body    = (await ask('Message: ')).trim();
-const simSlot = (await ask('SIM slot 0-based (optional, Enter to skip): ')).trim();
+const to   = parsed.to      ?? (await ask('Phone number: ')).trim();
+const body = parsed.message ?? (await ask('Message: ')).trim();
+const simSlot = parsed.simSlot ?? null;
+
+if (rl) rl.close();
 
 const ref = await db.collection('sms_jobs').add({
     to,
@@ -33,10 +60,9 @@ const ref = await db.collection('sms_jobs').add({
     sentAt: null,
     failedAt: null,
     error: null,
-    simSlot: simSlot !== '' ? Number(simSlot) : null,
+    simSlot: simSlot !== null ? Number(simSlot) : null,
     idempotencyKey: null,
     attemptCount: 0,
 });
 
 console.log('Created job', ref.id);
-rl.close();
