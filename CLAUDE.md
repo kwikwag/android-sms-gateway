@@ -108,8 +108,10 @@ Each module defines a `*Settings` class backed by `SettingsHelper` (which wraps 
 **Key design points:**
 - Uses Firebase anonymous auth; the anonymous UID must be added to `firestore.rules` allowlist (`REPLACE_AGENT_UID`)
 - `FirebaseAgentSettings` stores `enabled` flag and a stable `deviceId` (NanoId) in `PreferencesStorage`
-- `start()` attaches a Firestore snapshot listener; there is currently no `stop()` and no listener removal on app shutdown
-- Job claim is protected by a Firestore transaction (checks `status == "queued"` before claiming)
+- `start()` attaches a Firestore snapshot listener; `stop()` removes it and is called from `OrchestratorService.stop()`
+- Job claim is a Firestore transaction that checks `status == "queued"` and `expiresAt` before claiming
+- `sms_jobs` documents carry an `expiresAt` TTL field; Firestore auto-deletes them after expiry (configure TTL policy via `setup-firebase.js`)
+- Delivery status is propagated back to Firestore via `MessageStateChangedEvent` on the `EventBus` (not inline after `enqueueMessage`)
 - `firebase-agent/` scripts require `firebase-admin` and use ES module syntax (`"type": "module"` in package.json)
 
 ## Database Migrations
