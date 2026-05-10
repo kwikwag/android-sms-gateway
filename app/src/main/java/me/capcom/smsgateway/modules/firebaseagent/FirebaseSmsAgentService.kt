@@ -78,6 +78,11 @@ class FirebaseSmsAgentService(
         db.runTransaction { tx ->
             val s = tx.get(ref)
             if (s.getString("status") != "queued") return@runTransaction null
+            val expiresAt = s.getTimestamp("expiresAt")
+            if (expiresAt != null && expiresAt.toDate().before(Date())) {
+                tx.update(ref, mapOf("status" to "failed", "error" to "expired"))
+                return@runTransaction null
+            }
             tx.update(ref, mapOf(
                 "status" to "claimed",
                 "claimedBy" to settings.deviceId,

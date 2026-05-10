@@ -11,6 +11,7 @@
  *   - Enables the Cloud Firestore API (via gcloud if available)
  *   - Creates the Firestore database if it doesn't exist yet
  *   - Generates firestore.rules from firestore.rules.template (prompts for UIDs)
+ *   - Configures Firestore TTL policy on sms_jobs.expiresAt
  *   - Deploys Firestore rules and indexes
  *   - Registers the Android app if not already registered
  *   - Downloads google-services.json to app/
@@ -172,7 +173,29 @@ if (hasDefault) {
     }
 }
 
-// ─── 8. Firestore rules from template ────────────────────────────────────────
+// ─── 8. Firestore TTL policy ─────────────────────────────────────────────────
+step('Configuring Firestore TTL policy on expiresAt...');
+if (hasGcloud) {
+    const ttlResult = run('gcloud', [
+        'firestore', 'fields', 'ttls', 'update', 'expiresAt',
+        '--collection-group=sms_jobs',
+        '--enable-ttl',
+        '--project', projectId,
+        '--quiet',
+    ]);
+    if (ttlResult.status !== 0) {
+        warn('Could not enable TTL policy — enable it manually in the Firebase Console:');
+        warn('  Firestore → sms_jobs collection → Fields → TTL policy → expiresAt');
+    } else {
+        ok('TTL policy enabled on sms_jobs.expiresAt');
+    }
+} else {
+    warn('gcloud not found — enable the TTL policy manually in the Firebase Console:');
+    warn('  Firestore → sms_jobs collection → Fields → TTL policy → expiresAt');
+    await ask('  Press Enter to continue...');
+}
+
+// ─── 10. Firestore rules from template ───────────────────────────────────────
 step('Generating firestore.rules from template...');
 const templatePath = 'firestore.rules.template';
 const rulesPath = 'firestore.rules';
@@ -213,7 +236,7 @@ if (!fs.existsSync(templatePath)) {
     ok(`Written to ${rulesPath}`);
 }
 
-// ─── 9. Deploy rules & indexes ───────────────────────────────────────────────
+// ─── 11. Deploy rules & indexes ──────────────────────────────────────────────
 step('Deploying Firestore rules and indexes...');
 const deployResult = run('firebase', ['deploy', '--only', 'firestore:rules,firestore:indexes']);
 if (deployResult.status !== 0) {
@@ -223,7 +246,7 @@ if (deployResult.status !== 0) {
     ok('Rules and indexes deployed');
 }
 
-// ─── 10. Android app ─────────────────────────────────────────────────────────
+// ─── 12. Android app ─────────────────────────────────────────────────────────
 step('Checking Android app registration...');
 const appsRaw = capture('firebase', ['apps:list', 'ANDROID', '--json']);
 const apps = parseJsonResult(appsRaw.stdout) || [];
@@ -255,7 +278,7 @@ if (appId) {
     }
 }
 
-// ─── 11. google-services.json ────────────────────────────────────────────────
+// ─── 13. google-services.json ────────────────────────────────────────────────
 if (appId) {
     step('Downloading google-services.json...');
     const configRaw = capture('firebase', ['apps:sdkconfig', 'ANDROID', appId]);
@@ -278,7 +301,7 @@ if (appId) {
     warn(`google-services.json missing — download it from the Firebase Console and place it at:\n  ${GOOGLE_SERVICES_DEST}`);
 }
 
-// ─── 12. Service account for enqueue script ───────────────────────────────────
+// ─── 14. Service account for enqueue script ───────────────────────────────────
 step('Setting up service account for enqueue-test-message.js...');
 if (fs.existsSync(SERVICE_ACCOUNT_KEY_FILE)) {
     ok(`${SERVICE_ACCOUNT_KEY_FILE} already exists — skipping.`);

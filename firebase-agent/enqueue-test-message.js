@@ -20,6 +20,7 @@ for (let i = 0; i < args.length; i++) {
         console.log('  -t, --to <number>       Recipient phone number (required)');
         console.log('  -m, --message <text>    Message body (required)');
         console.log('  -s, --sim-slot <index>  SIM slot, 0-based (optional)');
+        console.log('  -T, --ttl <hours>       TTL in hours before Firestore auto-deletes the job (default: 24)');
         console.log('  -h, --help              Show this help');
         process.exit(0);
     } else if ((a === '--to' || a === '-t') && args[i + 1]) {
@@ -28,6 +29,8 @@ for (let i = 0; i < args.length; i++) {
         parsed.message = args[++i];
     } else if ((a === '--sim-slot' || a === '-s') && args[i + 1]) {
         parsed.simSlot = args[++i];
+    } else if ((a === '--ttl' || a === '-T') && args[i + 1]) {
+        parsed.ttl = args[++i];
     }
 }
 
@@ -44,9 +47,11 @@ const ask = (q) => {
     return new Promise(r => rl.question(q, r));
 };
 
-const to   = parsed.to      ?? (await ask('Phone number: ')).trim();
-const body = parsed.message ?? (await ask('Message: ')).trim();
+const to      = parsed.to      ?? (await ask('Phone number: ')).trim();
+const body    = parsed.message ?? (await ask('Message: ')).trim();
 const simSlot = parsed.simSlot ?? null;
+const ttlHours = parsed.ttl ? Number(parsed.ttl) : 24;
+const expiresAt = admin.firestore.Timestamp.fromDate(new Date(Date.now() + ttlHours * 3600 * 1000));
 
 if (rl) rl.close();
 
@@ -55,6 +60,7 @@ const ref = await db.collection('sms_jobs').add({
     body,
     status: 'queued',
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    expiresAt,
     claimedAt: null,
     claimedBy: null,
     sentAt: null,
