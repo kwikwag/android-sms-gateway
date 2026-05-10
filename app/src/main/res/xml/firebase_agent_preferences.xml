@@ -1,0 +1,6 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SwitchPreferenceCompat app:key="firebaseagent.ENABLED" app:title="Enable Firebase Agent" app:defaultValue="false" />
+    <EditTextPreference app:key="firebaseagent.DEVICE_ID" app:title="Device ID" app:useSimpleSummaryProvider="true" />
+    <Preference app:key="firebaseagent.firebase_uid" app:title="Firebase UID" app:summary="(not signed in — enable agent to sign in)" />
+    <Preference app:key="firebaseagent.rotate_uid" app:title="Rotate UID" app:summary="Sign out and get a new anonymous UID — update firestore.rules afterwards" />
+</PreferenceScreen>

@@ -8,6 +8,7 @@ import me.capcom.smsgateway.helpers.LocaleHelper
 import me.capcom.smsgateway.modules.connection.connectionModule
 import me.capcom.smsgateway.modules.encryption.encryptionModule
 import me.capcom.smsgateway.modules.events.eventBusModule
+import me.capcom.smsgateway.modules.firebaseagent.firebaseAgentModule
 import me.capcom.smsgateway.modules.gateway.GatewayService
 import me.capcom.smsgateway.modules.incoming.incomingModule
 import me.capcom.smsgateway.modules.localserver.localserverModule
@@ -54,6 +55,7 @@ class App: Application() {
                 localserverModule,
                 pingModule,
                 connectionModule,
+                firebaseAgentModule,
                 orchestratorModule,
             )
         }

@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthed() { return request.auth != null; }
+    // Replace these placeholders with real UIDs from Firebase Authentication users.
+    function isProducer() { return isAuthed() && request.auth.uid in ["REPLACE_PRODUCER_UID"]; }
+    function isAgent() { return isAuthed() && request.auth.uid in ["REPLACE_AGENT_UID"]; }
+
+    match /sms_jobs/{jobId} {
+      allow create: if isProducer()
+        && request.resource.data.status == 'queued'
+        && request.resource.data.to is string
+        && request.resource.data.body is string;
+
+      allow read: if isProducer() || isAgent();
+
+      allow update: if isAgent()
+        && resource.data.to == request.resource.data.to
+        && resource.data.body == request.resource.data.body;
+    }
+
+    match /devices/{deviceId} {
+      allow read: if isProducer() || isAgent();
+      allow write: if isAgent();
+    }
+  }
+}

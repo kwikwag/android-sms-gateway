@@ -165,9 +165,9 @@ class HomeFragment : Fragment() {
             actionStart(binding.buttonStart.isChecked)
         }
 
-//        if (settingsHelper.autostart) {
-//            actionStart(true)
-//        }
+        if (settingsHelper.autostart) {
+            actionStart(true)
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             events.collect<DeviceRegisteredEvent.Success> { event ->

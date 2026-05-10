@@ -396,3 +396,16 @@ Use this space to list resources you find helpful and would like to give credit 
 [issues-url]: https://github.com/capcom6/android-sms-gateway/issues
 [license-shield]: https://img.shields.io/github/license/capcom6/android-sms-gateway.svg?style=for-the-badge
 [license-url]: https://github.com/capcom6/android-sms-gateway/blob/master/LICENSE
+
+
+## Fork additions
+
+### Firebase Agent mode (experimental)
+An alternative backend using Firebase: the app polls a Firestore `sms_jobs` collection and sends SMS through the existing pipeline, reporting final delivery status back to Firestore via the internal event bus.
+
+- No custom server required — uses Firebase Auth (anonymous) + Cloud Firestore
+- UID-allowlist Firestore rules keep the queue private; UID is rotatable from within the app
+- `firebase-agent/` contains a setup script (`setup-firebase.js`) that automates project configuration, rules/index deployment, Android app registration, and service account creation
+- `firebase-agent/enqueue-test-message.js` for ad-hoc testing
+
+See `firebase-agent/README.md` for setup instructions.
