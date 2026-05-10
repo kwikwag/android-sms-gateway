@@ -10,19 +10,22 @@ It is separate from the official private SMSGate backend stack.
 
 ## Setup
 1. `cd firebase-agent && npm install`
-2. `node setup-firebase.js`
-3. Add `google-services.json` to `app/google-services.json`
-4. Deploy rules/indexes from this folder.
+2. `node setup-firebase.js` — interactive; handles project selection, Firestore DB creation, rules/indexes deployment, Android app registration, and `google-services.json` download automatically.
+3. In the Firebase Console, enable **Authentication → Sign-in method → Anonymous** (the only step the CLI cannot do).
+4. Build and install the app, then open **Settings → Firebase Agent**, enable it, and copy the **Firebase UID** shown there.
+5. Replace `REPLACE_AGENT_UID` in `firestore.rules` with that UID, then redeploy: `firebase deploy --only firestore:rules`
 
 ## Queue schema
 Collection `sms_jobs` documents:
 - `to`, `body`, `status`, timestamps (`createdAt`, `claimedAt`, `sentAt`, `failedAt`)
-- `claimedBy`, `error`, `simSlot`, `idempotencyKey`, `attemptCount`
+- `claimedBy`, `error`, `idempotencyKey`, `attemptCount`
+- `simSlot` (integer, **0-based** slot index; omit or set `null` to use the default SIM)
 
 Optional `devices/{deviceId}` includes `enabled`, `lastSeenAt`, `model`, `appVersion`.
 
 ## Security
-- Rules are UID allowlist based by default. Replace placeholders.
+- Rules are UID allowlist based by default. Replace `REPLACE_PRODUCER_UID` and `REPLACE_AGENT_UID` in `firestore.rules` with real UIDs before deploying.
+- The agent UID comes from anonymous Firebase Auth — find it in the app under **Settings → Firebase Agent → Firebase UID**.
 - Do not commit credentials or service account keys.
 
 ## Troubleshooting

@@ -61,6 +61,7 @@ class OrchestratorService(
         pingSvc.stop(context)
         localServerSvc.stop(context)
 
+        firebaseAgentSvc.stop()
         gatewaySvc.stop(context)
         webHooksSvc.stop(context)
         messagesSvc.stop(context)
